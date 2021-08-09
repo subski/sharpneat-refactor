@@ -1,11 +1,11 @@
 ﻿{
-	"name": "Logical XOR",
+	"name": "Black Jack",
 	"isAcyclic": true,
-	"activationFnName": "TanH",
+	"activationFnName": "LeakyReLU",
 	"evolutionAlgorithmSettings": {
-		"speciesCount": 10,
+		"speciesCount": 20,
 		"elitismProportion": 0.2,
-		"selectionProportion": 0.2,
+		"selectionProportion": 0.5,
 		"offspringAsexualProportion": 0.5,
 		"offspringSexualProportion": 0.5,
 		"interspeciesMatingProportion": 0.01
@@ -19,15 +19,15 @@
 	"reproductionSexualSettings": {
 		"secondaryParentGeneProbability": 0.1
 	},
-	"populationSize": 150,
+	"populationSize": 400,
 	"initialInterconnectionsProportion": 1,
-	"connectionWeightScale": 1.0,
+	"connectionWeightScale": 5.0,
 	"complexityRegulationStrategy": {
 		"strategyName": "absolute",
-		"complexityCeiling": 10,
+		"complexityCeiling": 300,
 		"minSimplifcationGenerations": 10
 	},
-	"degreeOfParallelism": 4,
-	"enableHardwareAcceleratedNeuralNets": false,
-	"enableHardwareAcceleratedActivationFunctions": false
+	"degreeOfParallelism": 16,
+	"enableHardwareAcceleratedNeuralNets": true,
+	"enableHardwareAcceleratedActivationFunctions": true
 }

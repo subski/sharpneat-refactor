@@ -9,7 +9,7 @@
     <Company />
     <Product>SharpNEAT - Evolution of Neural Networks.</Product>
     <UseWindowsForms>true</UseWindowsForms>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <StartupObject>SharpNeat.Windows.App.Program</StartupObject>
   </PropertyGroup>
 
@@ -43,6 +43,9 @@
     <None Update="config\experiments-config\prey-capture.config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="config\experiments-config\blackjack.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="config\experiments-config\xor.config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -64,7 +67,10 @@
     <None Update="config\experiments-descriptions\generative-sinewave.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="config\experiments-descriptions\xor.txt">
+    <None Update="config\experiments-descriptions\xor - Copy.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="config\experiments-descriptions\blackjack.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="config\experiments.json">

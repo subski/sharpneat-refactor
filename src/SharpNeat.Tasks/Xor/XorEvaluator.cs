@@ -9,6 +9,7 @@
  * You should have received a copy of the MIT License
  * along with SharpNEAT; if not, see https://opensource.org/licenses/MIT.
  */
+using System;
 using System.Diagnostics;
 using SharpNeat.BlackBox;
 using SharpNeat.Evaluation;
@@ -39,28 +40,34 @@ namespace SharpNeat.Tasks.Xor
             double fitness = 0.0;
             bool success = true;
 
-            // Test case 0, 0.
-            double output = Activate(box, 0.0, 0.0);
-            success &= output <= 0.5;
-            fitness += 1.0 - (output * output);
+            var d_in = new double[][] {
+                new double[] { 1, -1, -1},
+                new double[] { 1, -1, 1 },
+                new double[] { 1, 1, -1},
+                new double[] { 1, 1, 1}
+                };
 
-            // Test case 1, 1.
-            box.ResetState();
-            output = Activate(box, 1.0, 1.0);
-            success &= output <= 0.5;
-            fitness += 1.0 - (output * output);
+            var d_out =  new double[] { -1, 1, 1, -1 };
 
-            // Test case 0, 1.
-            box.ResetState();
-            output = Activate(box, 0.0, 1.0);
-            success &= output > 0.5;
-            fitness += 1.0 - ((1.0 - output) * (1.0 - output));
+            double output = 0.0;
 
-            // Test case 1, 0.
-            box.ResetState();
-            output = Activate(box, 1.0, 0.0);
-            success &= output > 0.5;
-            fitness += 1.0 - ((1.0 - output) * (1.0 - output));
+            for (int i=0; i< d_in.Length; i++)
+            {
+                box.ResetState();
+                output = Activate(box, d_in[i]);
+                if (d_out[i] < 0)
+                {
+                    //success &= output <= 0.5;
+                    //fitness += 1.0 - (output * output);
+                    success &= output < 0;
+                    fitness += (-0.25*(output*output)) - (0.5*output) + 0.75;
+                }
+                else
+                {
+                    success &= output > 0;
+                    fitness += (-0.25 * (output * output)) + (0.5 * output) + 0.75;
+                }
+            }
 
             // If all four responses were correct then we add 10 to the fitness.
             if(success) {
@@ -76,14 +83,10 @@ namespace SharpNeat.Tasks.Xor
 
         private static double Activate(
             IBlackBox<double> box,
-            double in1, double in2)
+            double[] in_d)
         {
-            // Bias input.
-            box.InputVector[0] = 1.0;
-
-            // XOR inputs.
-            box.InputVector[1] = in1;
-            box.InputVector[2] = in2;
+            for (int i = 0; i < in_d.Length; i++)
+                box.InputVector[i] = in_d[i];
 
             // Activate the black box.
             box.Activate();
@@ -91,13 +94,12 @@ namespace SharpNeat.Tasks.Xor
             // Read output signal.
             double output = box.OutputVector[0];
             Clip(ref output);
-            Debug.Assert(output >= 0.0, "Unexpected negative output.");
             return output;
         }
 
         private static void Clip(ref double x)
         {
-            if(x < 0.0) x = 0.0;
+            if(x < -1.0) x = -1.0;
             else if(x > 1.0) x = 1.0;
         }
 

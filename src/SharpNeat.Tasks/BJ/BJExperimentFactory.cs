@@ -14,17 +14,17 @@ using System.Text.Json;
 using SharpNeat.Experiments;
 using SharpNeat.NeuralNets;
 
-namespace SharpNeat.Tasks.Xor
+namespace SharpNeat.Tasks.BJ
 {
     /// <summary>
     /// A factory for creating instances of <see cref="INeatExperiment{T}"/> for the XOR task.
     /// </summary>
-    public sealed class XorExperimentFactory : INeatExperimentFactory
+    public sealed class BJExperimentFactory : INeatExperimentFactory
     {
         /// <summary>
         /// Gets a unique human-readable ID for the experiment.
         /// </summary>
-        public string Id => "xor";
+        public string Id => "blackjack";
 
         /// <summary>
         /// Creates a new instance of <see cref="INeatExperiment{T}"/> using experiment configuration settings
@@ -35,7 +35,7 @@ namespace SharpNeat.Tasks.Xor
         public INeatExperiment<double> CreateExperiment(JsonElement configElem)
         {
             // Create an evaluation scheme object for the XOR task.
-            var evalScheme = new XorEvaluationScheme();
+            var evalScheme = new BJEvaluationScheme();
 
             // Create a NeatExperiment object with the evaluation scheme,
             // and assign some default settings (these can be overridden by config).

@@ -13,7 +13,7 @@ namespace TestApp1
     {
         public static NeatEvolutionAlgorithm<double> CreateNeatEvolutionAlgorithm_Xor()
         {
-            var experimentFactory = new XorExperimentFactory();
+            var experimentFactory = new BJExperimentFactory();
             return Utils.CreateNeatEvolutionAlgorithm(experimentFactory);
         }
 
