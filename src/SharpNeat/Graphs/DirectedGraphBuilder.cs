@@ -10,6 +10,7 @@
  * along with SharpNEAT; if not, see https://opensource.org/licenses/MIT.
  */
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -55,11 +56,11 @@ namespace SharpNeat.Graphs
             // The array contents will be manipulated, so copying this avoids modification of the genome's
             // connection gene list.
             // The IDs are substituted for node indexes here.
-            ConnectionIdArrays connIdArrays = CopyAndMapIds(connections, nodeIdMap);
+            ConnectionIds connIds = CopyAndMapIds(connections, nodeIdMap);
 
             // Construct and return a new DirectedGraph.
             int totalNodeCount =  inputOutputCount + hiddenNodeIdArr.Length;
-            return new DirectedGraph(inputCount, outputCount, totalNodeCount, connIdArrays);
+            return new DirectedGraph(inputCount, outputCount, totalNodeCount, connIds);
         }
 
         #endregion
@@ -89,21 +90,22 @@ namespace SharpNeat.Graphs
             return hiddenNodeIdArr;
         }
 
-        private static ConnectionIdArrays CopyAndMapIds(
+        private static ConnectionIds CopyAndMapIds(
             Span<DirectedConnection> connSpan,
             INodeIdMap nodeIdMap)
         {
             int count = connSpan.Length;
-            int[] srcIdArr = new int[count];
-            int[] tgtIdArr = new int[count];
+            var connIds = new ConnectionIds(count);
+            var srcIds = connIds.GetSourceIdSpan();
+            var tgtIds = connIds.GetTargetIdSpan();
 
             for(int i=0; i < count; i++)
             {
-                srcIdArr[i] = nodeIdMap.Map(connSpan[i].SourceId);
-                tgtIdArr[i] = nodeIdMap.Map(connSpan[i].TargetId);
+                srcIds[i] = nodeIdMap.Map(connSpan[i].SourceId);
+                tgtIds[i] = nodeIdMap.Map(connSpan[i].TargetId);
             }
 
-            return new ConnectionIdArrays(srcIdArr, tgtIdArr);
+            return connIds;
         }
 
         #endregion

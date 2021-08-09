@@ -38,22 +38,20 @@ namespace SharpNeat.Graphs
         #region Public Static Methods
 
         /// <summary>
-        /// Sort the connections represented by <paramref name="connIdArrays"/>, and an accompanying values span.
+        /// Sort the connections represented by <paramref name="connIds"/>, and an accompanying values span.
         /// </summary>
-        /// <param name="connIdArrays">Represents the endpoint IDs of the connections to sort.</param>
-        /// <param name="vals">A span of values that will have its items reordered in the same way as <paramref name="connIdArrays"/>.</param>
+        /// <param name="connIds">Represents the endpoint IDs of the connections to sort.</param>
+        /// <param name="vals">A span of values that will have its items reordered in the same way as <paramref name="connIds"/>.</param>
         public static void Sort(
-            in ConnectionIdArrays connIdArrays,
+            in ConnectionIds connIds,
             Span<T> vals)
         {
-            Debug.Assert(connIdArrays._sourceIdArr is not null);
-            Debug.Assert(connIdArrays._targetIdArr is not null);
-            Debug.Assert(connIdArrays._sourceIdArr.Length == connIdArrays._targetIdArr.Length);
-            Debug.Assert(connIdArrays._sourceIdArr.Length == vals.Length);
+            Debug.Assert(connIds.GetSourceIdSpan().Length == connIds.GetTargetIdSpan().Length);
+            Debug.Assert(connIds.GetSourceIdSpan().Length == vals.Length);
 
             IntrospectiveSort(
-                connIdArrays._sourceIdArr.AsSpan(),
-                connIdArrays._targetIdArr.AsSpan(),
+                connIds.GetSourceIdSpan(),
+                connIds.GetTargetIdSpan(),
                 vals);
         }
 

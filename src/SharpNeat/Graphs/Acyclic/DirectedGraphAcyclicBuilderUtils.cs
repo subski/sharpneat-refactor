@@ -93,11 +93,11 @@ namespace SharpNeat.Graphs.Acyclic
             newIdByOldId = CompileNodeIdMap(depthInfo, digraph.TotalNodeCount, inputCount, ref timsortWorkArr, ref timsortWorkVArr);
 
             // Map the connection node IDs.
-            ConnectionIdArrays connIdArrays = digraph.ConnectionIdArrays;
-            MapIds(connIdArrays, newIdByOldId);
+            ConnectionIds connIds = digraph.ConnectionIds;
+            MapIds(connIds, newIdByOldId);
 
             // Init connection index map.
-            int connCount = connIdArrays.Length;
+            int connCount = connIds.Length;
             connectionIndexMap = new int[connCount];
             for(int i=0; i < connCount; i++) {
                 connectionIndexMap[i] = i;
@@ -107,7 +107,7 @@ namespace SharpNeat.Graphs.Acyclic
             // of the source nodes.
             // Note. This sort routine will also sort a secondary array, i.e. keep the items in both arrays aligned;
             // here we use this to create connectionIndexMap.
-            ConnectionSorter<int>.Sort(connIdArrays, connectionIndexMap);
+            ConnectionSorter<int>.Sort(connIds, connectionIndexMap);
 
             // Make a copy of the sub-range of newIdMap that represents the output nodes.
             // This is required later to be able to locate the output nodes now that they have been sorted by depth.
@@ -134,7 +134,7 @@ namespace SharpNeat.Graphs.Acyclic
             int connIdx = 0;
 
             int[] nodeDepthArr = depthInfo._nodeDepthArr;
-            int[] srcIdArr = connIdArrays._sourceIdArr;
+            ReadOnlySpan<int> srcIds = connIds.GetSourceIdSpan();
 
             for (int currDepth = 0; currDepth < graphDepth; currDepth++)
             {
@@ -142,7 +142,7 @@ namespace SharpNeat.Graphs.Acyclic
                 for (; nodeIdx < nodeCount && nodeDepthArr[nodeIdx] == currDepth; nodeIdx++);
 
                 // Scan for last connection at the current depth.
-                for (; connIdx < srcIdArr.Length && nodeDepthArr[srcIdArr[connIdx]] == currDepth; connIdx++);
+                for (; connIdx < srcIds.Length && nodeDepthArr[srcIds[connIdx]] == currDepth; connIdx++);
 
                 // Store node and connection end indexes for the layer.
                 layerInfoArr[currDepth] = new LayerInfo(nodeIdx, connIdx);
@@ -151,7 +151,7 @@ namespace SharpNeat.Graphs.Acyclic
             // Construct and return.
             return new DirectedGraphAcyclic(
                 inputCount, outputCount, nodeCount,
-                connIdArrays,
+                connIds,
                 layerInfoArr,
                 outputNodeIdxArr);
         }
@@ -230,16 +230,16 @@ namespace SharpNeat.Graphs.Acyclic
         }
 
         private static void MapIds(
-            in ConnectionIdArrays connIdArrays,
+            in ConnectionIds connIds,
             int[] newIdByOldId)
         {
-            int[] srcIdArr = connIdArrays._sourceIdArr;
-            int[] tgtIdArr = connIdArrays._targetIdArr;
+            Span<int> srcIds = connIds.GetSourceIdSpan();
+            Span<int> tgtIds = connIds.GetTargetIdSpan();
 
-            for(int i=0; i < srcIdArr.Length; i++)
+            for(int i=0; i < srcIds.Length; i++)
             {
-                srcIdArr[i] = newIdByOldId[srcIdArr[i]];
-                tgtIdArr[i] = newIdByOldId[tgtIdArr[i]];
+                srcIds[i] = newIdByOldId[srcIds[i]];
+                tgtIds[i] = newIdByOldId[tgtIds[i]];
             }
         }
 

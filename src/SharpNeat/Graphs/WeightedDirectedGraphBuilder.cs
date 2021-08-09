@@ -10,6 +10,7 @@
  * along with SharpNEAT; if not, see https://opensource.org/licenses/MIT.
  */
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -52,13 +53,13 @@ namespace SharpNeat.Graphs
             INodeIdMap nodeIdMap = DirectedGraphBuilderUtils.CompileNodeIdMap(
                 inputOutputCount, hiddenNodeIdArr);
 
-            // Extract/copy the neat genome connectivity graph into an ConnectionIdArrays structure.
+            // Extract/copy the neat genome connectivity graph into an ConnectionIds structure.
             // Notes.
             // The array contents will be manipulated, so copying this avoids modification of the genome's
             // connection gene list.
             // The IDs are substituted for node indexes here.
             CopyAndMapIds(connections, nodeIdMap,
-                out ConnectionIdArrays connIdArrays,
+                out ConnectionIds connIds,
                 out T[] weightArr);
 
             // Construct and return a new WeightedDirectedGraph.
@@ -66,7 +67,7 @@ namespace SharpNeat.Graphs
             return new WeightedDirectedGraph<T>(
                 inputCount, outputCount,
                 totalNodeCount,
-                connIdArrays,
+                connIds,
                 weightArr);
         }
 
@@ -104,22 +105,21 @@ namespace SharpNeat.Graphs
         private static void CopyAndMapIds(
             Span<WeightedDirectedConnection<T>> connSpan,
             INodeIdMap nodeIdMap,
-            out ConnectionIdArrays connIdArrays,
+            out ConnectionIds connIds,
             out T[] weightArr)
         {
             int count = connSpan.Length;
-            int[] srcIdArr = new int[count];
-            int[] tgtIdArr = new int[count];
+            connIds = new ConnectionIds(count);
+            var srcIds = connIds.GetSourceIdSpan();
+            var tgtIds = connIds.GetTargetIdSpan();
             weightArr = new T[count];
 
             for(int i=0; i < count; i++)
             {
-                srcIdArr[i] = nodeIdMap.Map(connSpan[i].SourceId);
-                tgtIdArr[i] = nodeIdMap.Map(connSpan[i].TargetId);
+                srcIds[i] = nodeIdMap.Map(connSpan[i].SourceId);
+                tgtIds[i] = nodeIdMap.Map(connSpan[i].TargetId);
                 weightArr[i] = connSpan[i].Weight;
             }
-
-            connIdArrays = new ConnectionIdArrays(srcIdArr, tgtIdArr);
         }
 
         #endregion

@@ -57,7 +57,7 @@ namespace SharpNeat.Graphs
         readonly int _totalNodeCount;
 
         // The connection source and target node IDs.
-        readonly ConnectionIdArrays _connIdArrays;
+        readonly ConnectionIds _connIds;
 
         // An array of indexes into _connArr.
         // For a given node index, gives the index of the first connection with that node as its source.
@@ -73,17 +73,17 @@ namespace SharpNeat.Graphs
         /// <param name="inputCount">Input node count.</param>
         /// <param name="outputCount">Output node count.</param>
         /// <param name="totalNodeCount">Total node count.</param>
-        /// <param name="connIdArrays">The connection source and target node IDs.</param>
+        /// <param name="connIds">The connection source and target node IDs.</param>
         internal DirectedGraph(
             int inputCount,
             int outputCount,
             int totalNodeCount,
-            in ConnectionIdArrays connIdArrays)
+            in ConnectionIds connIds)
         {
             _inputCount = inputCount;
             _outputCount = outputCount;
             _totalNodeCount = totalNodeCount;
-            _connIdArrays = connIdArrays;
+            _connIds = connIds;
         }
 
         #endregion
@@ -108,7 +108,7 @@ namespace SharpNeat.Graphs
         /// <summary>
         /// The internal arrays of connection source and target node indexes. Exposed publicly for high performance scenarios.
         /// </summary>
-        public ConnectionIdArrays ConnectionIdArrays => _connIdArrays;
+        public ConnectionIds ConnectionIds => _connIds;
 
         #endregion
 
@@ -119,9 +119,9 @@ namespace SharpNeat.Graphs
         /// </summary>
         /// <param name="connIdx">Connection index.</param>
         /// <returns>The connection's source node index.</returns>
-        public ref int GetSouceNodeIdx(int connIdx)
+        public ref int GetSourceNodeIdx(int connIdx)
         {
-            return ref _connIdArrays._sourceIdArr[connIdx];
+            return ref _connIds.GetSourceId(connIdx);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace SharpNeat.Graphs
         /// <returns>The connection's target node index.</returns>
         public ref int GetTargetNodeIdx(int connIdx)
         {
-            return ref _connIdArrays._targetIdArr[connIdx];
+            return ref _connIds.GetTargetId(connIdx);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace SharpNeat.Graphs
         /// </summary>
         /// <param name="srcNodeIdx">Source node index.</param>
         /// <returns>A span of target nodes indexes. </returns>
-        public Span<int> GetTargetNodeIndexes(int srcNodeIdx)
+        public ReadOnlySpan<int> GetTargetNodeIndexes(int srcNodeIdx)
         {
             if(_connIdxBySrcNodeIdx is null) {
                 _connIdxBySrcNodeIdx = CompileSourceNodeConnectionIndexes();
@@ -166,14 +166,14 @@ namespace SharpNeat.Graphs
             }
 
             // Scan for the last connection with the specified source node.
-            int[] connSrcIdArr = _connIdArrays._sourceIdArr;
-            int[] connTgtIdArr = _connIdArrays._targetIdArr;
+            ReadOnlySpan<int> connSrcIdArr = _connIds.GetSourceIdSpan();
+            ReadOnlySpan<int> connTgtIdArr = _connIds.GetTargetIdSpan();
 
             int endIdx = startIdx + 1;
             for(; endIdx < connSrcIdArr.Length && connSrcIdArr[endIdx] == srcNodeIdx; endIdx++);
 
             // Return a span over the sub-range of the connection array.
-            return connTgtIdArr.AsSpan(startIdx..endIdx);
+            return connTgtIdArr[startIdx..endIdx];
         }
 
         #endregion
@@ -196,23 +196,23 @@ namespace SharpNeat.Graphs
             }
 
             // If no connections then nothing to do.
-            int[] srcIdArr = _connIdArrays._sourceIdArr;
-            if(srcIdArr.Length == 0) {
+            ReadOnlySpan<int> srcIds = _connIds.GetSourceIdSpan();
+            if(srcIds.Length == 0) {
                 return connIdxBySrcNodeIdx;
             }
 
             // Initialise.
-            int currentSrcNodeId = srcIdArr[0];
+            int currentSrcNodeId = srcIds[0];
             connIdxBySrcNodeIdx[currentSrcNodeId] = 0;
 
             // Loop connections.
-            for(int i=1; i < srcIdArr.Length; i++)
+            for(int i=1; i < srcIds.Length; i++)
             {
-                if(srcIdArr[i] != currentSrcNodeId)
+                if(srcIds[i] != currentSrcNodeId)
                 {
                     // We have arrived at the next source node's connections.
-                    currentSrcNodeId = srcIdArr[i];
-                    connIdxBySrcNodeIdx[srcIdArr[i]] = i;
+                    currentSrcNodeId = srcIds[i];
+                    connIdxBySrcNodeIdx[srcIds[i]] = i;
                 }
             }
 
